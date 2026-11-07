@@ -1,0 +1,47 @@
+{
+  "source": "Sentinel-2 SR Harmonized",
+  "period": "1 Juni sampai 23 Agustus (2022 vs 2026)",
+
+  "mean_ndvi": 0.30891812171287036,
+  "green_coverage_percent": 39.10176099746426,
+
+  "comparison": {
+    "year_1": 2022,
+    "year_2": 2026,
+
+    "mean_ndvi_2022": 0.39589758835456185,
+    "mean_ndvi_2026": 0.30891812171287036,
+
+    "median_ndvi_2022": 0.3653932495150822,
+    "median_ndvi_2026": 0.2601996922827581,
+
+    "vegetation_indicator_2022": 51.963557275014296,
+    "vegetation_indicator_2026": 39.10176099746426,
+
+    "mean_ndvi_change": -0.08697946664169122,
+    "relative_mean_change_percent": -21.970193605673924,
+
+    "decreased_area_percent": 53.73758431639827,
+    "stable_area_percent": 38.16523508363988,
+    "increased_area_percent": 8.097180599961915
+  },
+
+  "study_area": {
+    "radius_m": 250,
+    "area_ha": 19.400378965615747,
+    "valid_comparison_area_ha": 19.315715175021293
+  },
+
+  "trend": [
+    {
+      "label": "2022",
+      "mean_ndvi": 0.39589758835456185
+    },
+    {
+      "label": "2026",
+      "mean_ndvi": 0.30891812171287036
+    }
+  ],
+
+  "note": "Sentinel-2 median composites using the same seasonal window from June 1 to August 23. NDVI >= 0.35 and the +/-0.05 change threshold are operational screening indicators and require field verification."
+}

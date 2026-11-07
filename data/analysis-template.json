@@ -1,0 +1,13 @@
+{
+  "source": "Sentinel-2 SR Harmonized",
+  "period": "YYYY-MM",
+  "mean_ndvi": null,
+  "green_coverage_percent": null,
+  "trend": [
+    {
+      "label": "YYYY-MM",
+      "mean_ndvi": null
+    }
+  ],
+  "note": "Template saja. Isi dengan hasil analisis asli dari Google Earth Engine; jangan gunakan null ini sebagai hasil penelitian."
+}

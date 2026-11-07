@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f9f6">
+  <title>GreenScope: Pantau, Verifikasi, Hijaukan</title>
+  <meta name="description" content="GreenScope memadukan pemantauan vegetasi satelit Sentinel-2, WebGIS komunitas, dan foto lapangan warga untuk keputusan reboisasi yang tepat di Jakarta.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
+  <link rel="stylesheet" href="style.css?v=6">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand-wrap" href="#top" aria-label="GreenScope Beranda">
+      <div class="brand">GreenScope</div>
+      <div class="tagline">Pantau. Verifikasi. Hijaukan.</div>
+    </a>
+    <div class="top-actions">
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero-section">
+      <div class="hero-main">
+        <h1>Mengubah data satelit menjadi keputusan reboisasi yang tepat sasaran.</h1>
+        <p class="hero-desc">
+          GreenScope menghubungkan analisis perubahan vegetasi satelit Sentinel-2 dengan foto kondisi nyata dari warga di sekitar SMP Islam Al-Azhar 19 Cibubur, memastikan penanaman pohon dilakukan tepat di atas tanah yang membutuhkan kanopi peneduh.
+        </p>
+        <div class="hero-buttons">
+          <button id="joinMissionBtn" type="button">+ Tambah Pantauan Baru</button>
+          <a class="button-link secondary-link" href="#webgis">Buka WebGIS</a>
+          <a class="button-link text-link" href="#metodologi">Pelajari Metodologi</a>
+        </div>
+      </div>
+
+      <div class="summary-bar" aria-label="Ringkasan Eksekutif Pemantauan dan Reboisasi">
+        <div class="summary-col">
+          <div class="summary-header">Sinyal Satelit Sentinel-2</div>
+          <div class="summary-stat-row">
+            <div class="stat-unit">
+              <span class="stat-label">Rerata NDVI 2026</span>
+              <strong class="stat-val" id="meanNdvi">0.309</strong>
+            </div>
+            <div class="stat-unit">
+              <span class="stat-label">Perubahan vs 2022</span>
+              <strong class="stat-val stat-decrease" id="relativeChange">-21.97%</strong>
+            </div>
+          </div>
+          <div class="summary-subtext">
+            Sinyal vegetasi menurun terdeteksi pada <strong id="decreasedArea">53.74%</strong> zona inti studi satelit.
+          </div>
+        </div>
+
+        <div class="summary-col">
+          <div class="summary-header">Bukti Lapangan Warga (Ground Truth)</div>
+          <div class="summary-stat-row">
+            <div class="stat-unit">
+              <span class="stat-label">Total Pantauan</span>
+              <strong class="stat-val" id="obsCount">0</strong>
+            </div>
+            <div class="stat-unit">
+              <span class="stat-label">Prioritas Reboisasi</span>
+              <strong class="stat-val stat-warn" id="actionCount">0</strong>
+            </div>
+          </div>
+          <div class="summary-subtext">
+            Foto nyata warga untuk mengonfirmasi tanah gundul terbuka vs area perkerasan permanen.
+          </div>
+        </div>
+
+        <div class="summary-col">
+          <div class="summary-header">Gerakan Komunitas Sekolah</div>
+          <div class="summary-stat-row">
+            <div class="stat-unit">
+              <span class="stat-label">Target Verifikasi</span>
+              <strong class="stat-val" id="missionProgressLabel">0 / 50</strong>
+            </div>
+            <div class="stat-unit">
+              <span class="stat-label">Vegetasi Terawat</span>
+              <strong class="stat-val stat-good" id="impactGreen">0</strong>
+            </div>
+          </div>
+          <div class="progress-track" aria-label="Progres pengumpulan data pantauan">
+            <div class="progress-fill" id="missionProgress"></div>
+          </div>
+          <div class="summary-subtext">
+            Aksi sains warga pelajar dan warga sekitar untuk panduan bibit pohon yang tepat.
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden hook targets for secondary stats -->
+      <span id="greenCoverage" hidden>39.1%</span>
+      <span id="meanNdvi2022" hidden>0.396</span>
+      <span id="meanNdvi2026" hidden>0.309</span>
+      <span id="stableArea" hidden>38.17%</span>
+      <span id="increasedArea" hidden>8.10%</span>
+      <span id="impactObservations" hidden>0</span>
+      <span id="impactNeedsReview" hidden>0</span>
+    </section>
+
+    <section class="workspace-section" id="webgis">
+      <div class="workspace-header">
+        <div>
+          <h2>WebGIS Pemantauan Lingkungan Cibubur</h2>
+          <p class="workspace-subtitle">Pemantauan kanopi vegetasi dan pelaporan kondisi nyata lahan Cibubur dan sekitarnya</p>
+        </div>
+        <div class="workspace-controls">
+          <button id="jakartaViewBtn" class="secondary" type="button">Wilayah Jakarta</button>
+          <button id="pilotViewBtn" class="secondary" type="button">Fokus Cibubur</button>
+          <button id="surveyModeBtn" class="action-btn" type="button">+ Tambah Pantauan Baru</button>
+          <button id="exportBtn" class="secondary" type="button">Ekspor GeoJSON</button>
+        </div>
+      </div>
+
+      <div id="surveyBanner" class="survey-banner" hidden>
+        <div class="survey-banner-content">
+          <strong>Penandaan Lokasi Lapangan:</strong> Silakan klik satu titik tanah pada peta satelit untuk meletakkan pin dan mendokumentasikan kondisi nyata lahan.
+        </div>
+        <button id="cancelSurveyBtn" class="secondary banner-close-btn" type="button">Batal</button>
+      </div>
+
+      <div class="gis-layout">
+        <div class="map-container">
+          <div id="map" aria-label="Peta interaktif GreenScope"></div>
+          <div class="map-caption">
+            Alur: Navigasi peta &rarr; Klik '+ Tambah Pantauan Baru' &rarr; Klik titik tanah di peta &rarr; Unggah foto dan pilih rekomendasi &rarr; Simpan.
+          </div>
+        </div>
+
+        <aside class="gis-console">
+          <nav class="console-tabs" aria-label="Tab navigasi konsol pemantauan">
+            <button type="button" class="tab-btn active" id="tabBtnFeed" data-tab="tabFeed">Pantauan Warga</button>
+            <button type="button" class="tab-btn" id="tabBtnSat" data-tab="tabSat">Analisis Satelit</button>
+            <button type="button" class="tab-btn" id="tabBtnGuide" data-tab="tabGuide">Panduan Reboisasi</button>
+          </nav>
+
+          <div class="tab-pane active" id="tabFeed">
+            <div class="pane-head">
+              <span class="pane-title">Daftar Pantauan Lapangan</span>
+              <button id="clearObsBtn" class="text-danger-btn" type="button">Hapus Data</button>
+            </div>
+            <div id="observationsList" class="obs-scroll">
+              <p class="empty-state">Belum ada pantauan lapangan. Klik '+ Tambah Pantauan Baru' untuk menambahkan foto kondisi nyata tanah.</p>
+            </div>
+          </div>
+
+          <div class="tab-pane" id="tabSat" hidden>
+            <div class="pane-head">
+              <span class="pane-title">Tren Spektral Sentinel-2 (2022 vs 2026)</span>
+            </div>
+            <div class="sat-card">
+              <div class="sat-grid">
+                <div class="sat-box">
+                  <span class="sat-box-label">Rerata NDVI 2022</span>
+                  <strong class="sat-box-val">0.396</strong>
+                  <small>Kerapatan kanopi sedang-tinggi</small>
+                </div>
+                <div class="sat-box">
+                  <span class="sat-box-label">Rerata NDVI 2026</span>
+                  <strong class="sat-box-val">0.309</strong>
+                  <small>Penurunan relatif 21.97%</small>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="trendChart" aria-label="Grafik perbandingan NDVI historis"></canvas>
+              </div>
+              <div class="sat-note" id="satStatus">Sentinel-2 SR Harmonized · Median musim kemarau 1 Juni sampai 23 Agustus.</div>
+              <p class="muted-caption" id="trendMessage">Memuat ringkasan analisis satelit...</p>
+            </div>
+
+            <div class="custom-analysis-wrap">
+              <label for="analysisFile" class="custom-analysis-label">Muat Berkas JSON Analisis Lain</label>
+              <input id="analysisFile" type="file" accept=".json,application/json">
+            </div>
+          </div>
+
+          <div class="tab-pane" id="tabGuide" hidden>
+            <div class="pane-head">
+              <span class="pane-title">Klasifikasi Lahan dan Rekomendasi Bibit</span>
+            </div>
+            <div class="guide-scroll">
+              <div class="guide-item guide-critical">
+                <div class="guide-tag">Lahan Kritis: Butuh Tanam</div>
+                <p>Tanah gundul terbuka terpapar terik matahari tanpa peneduh. Prioritas utama reboisasi bibit pohon berakar dalam dan rindang (Trembesi, Tabebuya, Ketapang Kencana).</p>
+              </div>
+              <div class="guide-item guide-open">
+                <div class="guide-tag">Area Terbuka: Potensial</div>
+                <p>Lahan terbuka atau berumput jarang. Potensial untuk penambahan kanopi hijau lingkungan sekolah atau tanaman perdu penyerap polutan.</p>
+              </div>
+              <div class="guide-item guide-tree">
+                <div class="guide-tag">Pohon Rindang Terawat</div>
+                <p>Kerapatan kanopi sehat dan lebat. Perlu dirawat kelestariannya serta dilindungi dari alih fungsi lahan perkerasan.</p>
+              </div>
+              <div class="guide-item guide-hardscape">
+                <div class="guide-tag">Permukaan Keras / Aspal</div>
+                <p>Area tertutup semen atau jalan aspal. Penanaman bibit di tanah tidak memungkinkan; disarankan tanaman dalam pot atau jalur hijau pembatas.</p>
+              </div>
+              <div class="storage-info">
+                <strong>Status Penyimpanan:</strong>
+                <p id="dataModeDescription">Data tersimpan lokal di peramban. Anda dapat mengekspornya ke GeoJSON kapan saja.</p>
+                <button id="refreshCommunityBtn" class="secondary refresh-btn" type="button">Perbarui Sinkronisasi</button>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="method-section" id="metodologi">
+      <div class="method-header">
+        <h2>Metodologi Kolaborasi Citra Satelit dan Bukti Lapangan</h2>
+        <p class="method-subtitle">Menghubungkan penginderaan jauh dengan realitas tanah untuk mencegah kegagalan penanaman pohon.</p>
+      </div>
+
+      <div class="method-pillars">
+        <div class="method-pillar">
+          <div class="pillar-num">1</div>
+          <h3>Deteksi Spektral</h3>
+          <p>Satelit Sentinel-2 memindai indeks vegetasi (NDVI) untuk menyaring wilayah yang mengalami penurunan kerapatan kanopi daun selama 4 tahun terakhir.</p>
+        </div>
+        <div class="method-pillar">
+          <div class="pillar-num">2</div>
+          <h3>Verifikasi Visual Warga</h3>
+          <p>Warga dan siswa mengambil foto nyata kondisi tanah di titik koordinat. Foto membuktikan apakah area tersebut tanah gundul siap tanam atau permukaan aspal.</p>
+        </div>
+        <div class="method-pillar">
+          <div class="pillar-num">3</div>
+          <h3>Keputusan Tepat Sasaran</h3>
+          <p>Komparasi data satelit vs foto lapangan memastikan alokasi bibit pohon ditanam pada tanah yang benar-benar membutuhkan dan mampu mendukung pertumbuhan akar.</p>
+        </div>
+        <div class="method-pillar">
+          <div class="pillar-num">4</div>
+          <h3>Perawatan Berkelanjutan</h3>
+          <p>Sekolah dan komunitas sekitar menjadi pengawal lingkungan, memantau berkala perkembangan tanaman hingga menghasilkan kanopi peneduh nyata.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="surveyDialog" class="app-dialog">
+    <form method="dialog" id="surveyForm" class="dialog-form">
+      <div class="dialog-head">
+        <div>
+          <h2>Kirim Pantauan Kondisi Lapangan</h2>
+          <p class="dialog-subtitle">Unggah foto kondisi tanah untuk memvalidasi data satelit</p>
+        </div>
+        <button type="submit" value="cancel" class="close-btn" aria-label="Tutup formulir">&times;</button>
+      </div>
+
+      <div class="privacy-note">
+        <strong>Data anonim lingkungan:</strong> Jangan mengunggah foto dokumen pribadi, wajah individu, atau identitas nomor kontak.
+      </div>
+
+      <div class="form-group">
+        <label for="obsPhoto">Foto Kondisi Nyata Lapangan (Ground Truth)</label>
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="obsPhoto" accept="image/*" class="file-input">
+          <div class="upload-prompt" id="uploadPrompt">
+            <span class="upload-title">Pilih foto dari galeri atau ambil lewat kamera</span>
+            <span class="upload-sub">Format JPG, PNG, atau WebP (terkompresi otomatis)</span>
+          </div>
+          <div class="photo-preview-wrap" id="photoPreviewWrap" hidden>
+            <img id="photoPreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E" alt="Pratinjau foto kondisi lapangan">
+            <button type="button" id="removePhotoBtn" class="remove-photo-btn">Ganti Foto</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="obsCategory">Kondisi Fisik Lahan</label>
+        <select id="obsCategory" required>
+          <option value="critical">Lahan Kritis (Tanah Terbuka Butuh Reboisasi Segera)</option>
+          <option value="open">Area Terbuka Hijau (Potensi Penanaman Tambahan)</option>
+          <option value="tree">Pohon Rindang Eksisting (Area Konservasi Terjaga)</option>
+          <option value="hardscape">Permukaan Keras (Aspal, Beton, Struktur Bangunan)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="obsUrgency">Rekomendasi Kebutuhan Aksi Reboisasi</label>
+        <select id="obsUrgency" required>
+          <option value="urgent">Mendesak Ditanami Bibit Pohon</option>
+          <option value="potential">Potensial untuk Penghijauan Bertahap</option>
+          <option value="conserved">Area Terjaga Baik (Perlu Perawatan Rutin)</option>
+          <option value="ineligible">Bukan Area Tanam (Fasilitas Umum / Bangunan)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="obsNote">Catatan Kondisi Lapangan</label>
+        <textarea id="obsNote" maxlength="200" placeholder="Contoh: Tanah gundul berbatu terpapar panas terik tanpa naungan. Dekat saluran air sekolah, cocok untuk bibit trembesi atau ketapang kencana."></textarea>
+      </div>
+
+      <div class="coord-tag" id="coordDisplay">Koordinat lokasi: Menunggu penentuan titik di peta...</div>
+
+      <input id="obsLat" type="hidden">
+      <input id="obsLng" type="hidden">
+
+      <div class="dialog-actions">
+        <button type="submit" value="cancel" class="secondary">Batal</button>
+        <button id="saveObsBtn" type="button">Simpan Pantauan Lapangan</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="comparisonDialog" class="app-dialog comparison-modal">
+    <div class="dialog-head">
+      <div>
+        <h2>Komparasi Data Satelit vs Foto Lapangan</h2>
+        <p class="dialog-subtitle">Evaluasi keselarasan antara citra Sentinel-2 dan dokumentasi nyata warga</p>
+      </div>
+      <button type="button" id="closeComparisonBtn" class="close-btn" aria-label="Tutup evaluasi">&times;</button>
+    </div>
+
+    <div class="comparison-grid">
+      <div class="comparison-card">
+        <div class="comparison-card-head">
+          <h3>Kondisi Lapangan Warga</h3>
+          <span class="badge" id="modalUrgencyBadge">Mendesak</span>
+        </div>
+        <div class="comparison-photo-wrap">
+          <img id="modalFieldPhoto" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E" alt="Foto kondisi lapangan nyata warga">
+          <div id="modalNoPhoto" class="no-photo-box" hidden>Warga tidak menyertakan foto pada pantauan ini.</div>
+        </div>
+        <div class="detail-meta-grid">
+          <div class="detail-item">
+            <span class="detail-label">Kondisi Fisik</span>
+            <strong id="modalCategoryText" class="detail-val">Lahan Kritis</strong>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Koordinat</span>
+            <span id="modalCoordText" class="detail-val">-6.3663, 106.8883</span>
+          </div>
+          <div class="detail-item detail-item-full">
+            <span class="detail-label">Waktu Rekam</span>
+            <span id="modalDateText" class="detail-val">-</span>
+          </div>
+        </div>
+        <div class="detail-note-wrap">
+          <span class="detail-label">Catatan Lapangan</span>
+          <p id="modalNoteText" class="detail-note">Catatan kondisi lapangan.</p>
+        </div>
+      </div>
+
+      <div class="comparison-card">
+        <div class="comparison-card-head">
+          <h3>Data Spektral Satelit</h3>
+          <span class="badge" id="modalSatSignalBadge">Analisis Citra</span>
+        </div>
+        <div class="sat-summary-box">
+          <div class="sat-stat">
+            <span>Rerata NDVI 2026:</span>
+            <strong id="modalSatNdvi2026">0.309</strong>
+          </div>
+          <div class="sat-stat">
+            <span>Rerata NDVI 2022:</span>
+            <strong id="modalSatNdvi2022">0.396</strong>
+          </div>
+          <div class="sat-stat">
+            <span>Perubahan Relatif:</span>
+            <strong id="modalSatChange">-21.97%</strong>
+          </div>
+        </div>
+        <div class="decision-box">
+          <h4>Evaluasi Keputusan Reboisasi</h4>
+          <p id="modalDecisionText">
+            Hasil interpretasi komparatif antara bukti spektral dan foto lapangan.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-actions comparison-actions">
+      <a id="modalStreetViewLink" href="#" target="_blank" rel="noopener noreferrer" class="button-link secondary-link">Buka Google Street View 360°</a>
+      <button type="button" id="dismissComparisonBtn" class="secondary">Tutup Evaluasi</button>
+    </div>
+  </dialog>
+
+  <footer>
+    <div class="footer-content">
+      <span><strong>GreenScope</strong>: Platform pemantauan lingkungan berbasis satelit dan partisipasi sains warga untuk aksi reboisasi Cibubur.</span>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js?v=6"></script>
+</body>
+</html>
