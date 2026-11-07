@@ -343,40 +343,49 @@ main {
   background: var(--ink);
 }
 
-.survey-banner {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 14px 20px;
-  margin-bottom: 20px;
+.survey-floating-hint {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: #111827;
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 6px 8px 6px 14px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-}
-
-.survey-banner-content {
-  font-size: 0.9rem;
-  color: var(--ink);
-  line-height: 1.5;
-}
-
-.banner-close-btn {
-  padding: 0.42rem 0.95rem;
-  font-size: 0.84rem;
-  background: var(--surface);
-  color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  gap: 10px;
   white-space: nowrap;
+  pointer-events: auto;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.survey-floating-hint[hidden] {
+  display: none !important;
+}
+
+.hint-text {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.hint-close-btn {
+  background: #ffffff;
+  color: #111827;
+  border: 0;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.74rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, opacity 0.15s ease;
+  line-height: 1.3;
 }
 
-.banner-close-btn:hover {
-  background: var(--surface-alt);
-  border-color: #cbd5e1;
+.hint-close-btn:hover {
+  background: #e2e8f0;
 }
 
 .survey-target-pin {
@@ -437,6 +446,7 @@ main {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  position: relative;
 }
 
 #map {

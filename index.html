@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
   <header class="topbar">
@@ -122,15 +122,12 @@
         </div>
       </div>
 
-      <div id="surveyBanner" class="survey-banner" hidden>
-        <div class="survey-banner-content">
-          <strong>Penandaan Lokasi Lapangan:</strong> Silakan klik satu titik tanah pada peta satelit untuk meletakkan pin dan mendokumentasikan kondisi nyata lahan.
-        </div>
-        <button id="cancelSurveyBtn" class="secondary banner-close-btn" type="button">Batal</button>
-      </div>
-
       <div class="gis-layout">
         <div class="map-container">
+          <div id="surveyBanner" class="survey-floating-hint" hidden>
+            <span class="hint-text">Klik titik tanah di peta untuk menandai lokasi</span>
+            <button id="cancelSurveyBtn" class="hint-close-btn" type="button">Batal</button>
+          </div>
           <div id="map" aria-label="Peta interaktif GreenScope"></div>
           <div class="map-caption">
             Alur: Navigasi peta &rarr; Klik '+ Tambah Pantauan Baru' &rarr; Klik titik tanah di peta &rarr; Unggah foto dan pilih rekomendasi &rarr; Simpan.
@@ -396,6 +393,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="config.js"></script>
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>

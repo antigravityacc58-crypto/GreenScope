@@ -775,6 +775,7 @@ document.addEventListener("DOMContentLoaded", () => {
   surveyDialog?.addEventListener("close", () => {
     if (surveyDialog.returnValue === "cancel") {
       clearTempMarker();
+      setSurveyMode(false);
     }
   });
 
